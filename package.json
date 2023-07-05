@@ -4,7 +4,8 @@
   },
   "license": "SEE LICENSE IN be gay do crime",
   "dependencies": {
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "string-width": "^6.1.0"
   },
   "type": "module"
 }
