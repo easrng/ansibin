@@ -63,6 +63,28 @@ export default (h) => String.raw`<!DOCTYPE html>
         background: var(--term-fg);
         color: var(--term-bg);
       }
+      .w-2 {
+        position: relative;
+      }
+      .w-2 > :first-child {
+        user-select: none;
+        visibility: hidden;
+      }
+      .w-2 > :last-child {
+        position: absolute;
+        left: 0;
+      }
+      .dim {
+        opacity: 0.5;
+      }
+      .blink {
+        animation: blink 1.5s infinite steps(2);
+      }
+      @keyframes blink {
+        to {
+          opacity: 0;
+        }
+      }
     </style>
     <style>
       .theme-default {

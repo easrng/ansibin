@@ -2,6 +2,17 @@ const escapeHtml = (s) =>
   s.replace(/[\x26\x0A\<>'"]/g, (s) => "&#" + s.charCodeAt(0) + ";");
 import stringWidth from "string-width";
 export function toHtml(terminal) {
+  const fixWidths = (str) => {
+    let o = "";
+    for (const { segment: character } of new Intl.Segmenter().segment(str)) {
+      const w = stringWidth(character);
+      if (w === 2)
+        o += '<span class="w-2"><span aria-hidden="true">  </span><span>';
+      o += escapeHtml(character);
+      if (w === 2) o += "</span></span>";
+    }
+    return o;
+  };
   const toCSS = ([
     fg,
     bg,
@@ -31,23 +42,30 @@ export function toHtml(terminal) {
     const decorations = [];
     if (underline) decorations.push("underline");
     if (overline) decorations.push("overline");
-    if (blink) decorations.push("blink");
     if (strikethrough) decorations.push("line-through");
     if (decorations.length > 0)
       props.push("text-decoration:" + decorations.join(" "));
     if (invisible) props.push("visibility:hidden");
     if (italic) props.push("font-style:italic");
-    if (dim) props.push("opacity:0.5");
-    return props.join(";");
+    return { css: props.join(";"), dim, blink };
   };
   let html = "<pre><div>";
   for (const row of terminal) {
     let style = [];
     for (let seg of row) {
       if (typeof seg === "string") {
+        const s = toCSS(style);
+        let innerS = "";
+        let innerE = "";
+        if (s.dim || s.blink) {
+          innerS = `<span class="${[s.dim && "dim", s.blink && "blink"]
+            .filter(Boolean)
+            .join(" ")}">`;
+          innerE = `</span>`;
+        }
         html += `<span${
-          style.length > 0 ? ` style="${escapeHtml(toCSS(style))}"` : ""
-        }>${escapeHtml(seg)}</span>`;
+          style.length > 0 ? ` style="${escapeHtml(s.css)}"` : ""
+        }>${innerS}${fixWidths(seg)}${innerE}</span>`;
       } else {
         style = seg;
       }
